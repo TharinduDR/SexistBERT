@@ -54,7 +54,7 @@ args = {
     "multiprocessing_chunksize": 500,
     'silent': False,
 
-    'wandb_project': None,
+    'wandb_project': "SexistBERT",
     'wandb_kwargs': {},
 
     "use_early_stopping": True,
