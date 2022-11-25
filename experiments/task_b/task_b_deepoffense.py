@@ -28,7 +28,7 @@ train = train.rename(columns={'label_category': 'labels'})
 
 # load training data
 train = train[['text', 'labels']]
-train = train[train['labels'].notna()]
+train = train[train.labels != "none"]
 
 train['labels'] = encode(train["labels"])
 
