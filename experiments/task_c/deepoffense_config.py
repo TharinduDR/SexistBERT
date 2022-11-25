@@ -1,6 +1,6 @@
 from multiprocessing import cpu_count
 
-TEMP_DIRECTORY = "temp_taskb/data"
+TEMP_DIRECTORY = "temp_taskc/data"
 TRAIN_FILE = "train.tsv"
 TEST_FILE = "test.tsv"
 RESULT_FILE = "result.csv"
@@ -9,9 +9,9 @@ SEED = 777
 # training instances = 7000 > if batch size=8, batches = 875 > evaluate during training steps -> 80 or 175
 
 args = {
-    'output_dir': 'temp_taskb/outputs/',
-    "best_model_dir": "temp_taskb/outputs/best_model",
-    'cache_dir': 'temp_taskb/cache_dir/',
+    'output_dir': 'temp_taskc/outputs/',
+    "best_model_dir": "temp_taskc/outputs/best_model",
+    'cache_dir': 'temp_taskc/cache_dir/',
 
     'fp16': False,
     'fp16_opt_level': 'O1',
@@ -21,7 +21,7 @@ args = {
     'eval_batch_size': 32,
     'num_train_epochs': 8,
     'weight_decay': 0,
-    'learning_rate': 1e-5,
+    'learning_rate': 2e-5,
     'adam_epsilon': 1e-8,
     'warmup_ratio': 0.06,
     'warmup_steps': 0,
