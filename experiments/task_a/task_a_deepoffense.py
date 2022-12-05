@@ -6,6 +6,7 @@ import sklearn
 import statistics
 import torch
 from sklearn.model_selection import train_test_split
+from scipy.special import softmax
 
 from deepoffense.classification import ClassificationModel
 from deepoffense.util.evaluation import macro_f1, weighted_f1
@@ -54,7 +55,18 @@ test['label_pred'] = decode(test['label_pred'])
 test = test[['rewire_id', 'label_pred']]
 test.to_csv(os.path.join(TEMP_DIRECTORY, RESULT_FILE), header=True, index=False, encoding='utf-8')
 
+with open('data/gab_1M_unlabelled.csv') as f:
+    gab_lines = f.read().splitlines()
 
+gab_lines.pop(0)
+gap_predictions, gap_raw_outputs = model.predict(gab_lines)
+probabilities = softmax(gap_raw_outputs, axis=1)
+prediction_probabolities = list(zip(*probabilities))[0]
+
+with open('predictions_spanbert.txt', 'w') as f:
+    # write each integer to the file on a new line
+    for number in prediction_probabolities:
+        f.write(str(number) + '\n')
 
 
 
