@@ -7,6 +7,8 @@ import statistics
 import torch
 from sklearn.model_selection import train_test_split
 from scipy.special import softmax
+from datasets import Dataset
+from datasets import load_dataset
 
 from deepoffense.classification import ClassificationModel
 from deepoffense.util.evaluation import macro_f1, weighted_f1
@@ -63,11 +65,44 @@ gap_predictions, gap_raw_outputs = model.predict(gab_lines)
 probabilities = softmax(gap_raw_outputs, axis=1)
 prediction_probabolities = list(zip(*probabilities))[0]
 
-with open('predictions_spanbert.txt', 'w') as f:
+with open('predictions_spanbert_gab.txt', 'w') as f:
     # write each integer to the file on a new line
     for number in prediction_probabolities:
         f.write(str(number) + '\n')
 
+with open('data/reddit_1M_unlabelled.csv') as f:
+    reddit_lines = f.read().splitlines()
+
+reddit_lines.pop(0)
+reddit_predictions, reddit_raw_outputs = model.predict(reddit_lines)
+probabilities = softmax(reddit_raw_outputs, axis=1)
+prediction_probabolities = list(zip(*probabilities))[0]
+
+with open('predictions_spanbert_reddit.txt', 'w') as f:
+    # write each integer to the file on a new line
+    for number in prediction_probabolities:
+        f.write(str(number) + '\n')
+
+def split(a, n):
+    k, m = divmod(len(a), n)
+    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
+
+solid = Dataset.to_pandas(load_dataset('tharindu/SOLID', split='train', sep="\t"))
+solid_sentences = solid["text"].to_list()
 
 
+probability_predictions = []
+test_batches = split(solid_sentences, 10)
+for index, break_list in enumerate(test_batches):
+    print("Length of the break lists", len(break_list))
+    temp_solid_predictions, temp_solid_raw_outputs = model.predict(break_list)
+    temp_probability_predictions = []
+    for output in temp_solid_raw_outputs:
+        weights = softmax(output)
+        temp_probability_predictions.append(weights)
+    probability_predictions.extend(temp_probability_predictions)
 
+with open('predictions_spanbert_solid.txt', 'w') as f:
+    # write each integer to the file on a new line
+    for number in probability_predictions:
+        f.write(str(number) + '\n')
