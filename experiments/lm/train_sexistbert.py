@@ -37,6 +37,7 @@ model_args.learning_rate = 2e-5
 model_args.evaluate_during_training = True
 model_args.evaluate_during_training_steps = 30000
 model_args.no_save = True
+model_args.wandb_project = "LM"
 
 
 train_file = "train.txt"
