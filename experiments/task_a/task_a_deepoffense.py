@@ -87,7 +87,7 @@ def split(a, n):
     k, m = divmod(len(a), n)
     return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
-solid = Dataset.to_pandas(load_dataset('tharindu/SOLID', split='train', sep="\t"))
+solid = Dataset.to_pandas(load_dataset('tharindu/SOLID', split='train'))
 solid_sentences = solid["text"].to_list()
 
 
