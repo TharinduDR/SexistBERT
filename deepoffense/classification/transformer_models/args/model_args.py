@@ -1,10 +1,10 @@
-import sys
-
 import json
 import os
-import warnings
-from dataclasses import asdict, dataclass, field
+import sys
+from dataclasses import asdict, dataclass, field, fields
 from multiprocessing import cpu_count
+import warnings
+
 from torch.utils.data import Dataset
 
 
@@ -29,6 +29,7 @@ class ModelArgs:
     adafactor_relative_step: bool = True
     adafactor_scale_parameter: bool = True
     adafactor_warmup_init: bool = True
+    adam_betas: tuple = field(default_factory=lambda: (0.9, 0.999))
     adam_epsilon: float = 1e-8
     best_model_dir: str = "outputs/best_model"
     cache_dir: str = "cache_dir/"
@@ -56,6 +57,8 @@ class ModelArgs:
     learning_rate: float = 4e-5
     local_rank: int = -1
     logging_steps: int = 50
+    loss_type: str = None
+    loss_args: dict = field(default_factory=dict)
     manual_seed: int = None
     max_grad_norm: float = 1.0
     max_seq_length: int = 128
@@ -113,6 +116,8 @@ class ModelArgs:
             for key, value in asdict(self).items()
             if key not in self.not_saved_args
         }
+        if "settings" in args_for_saving["wandb_kwargs"]:
+            del args_for_saving["wandb_kwargs"]["settings"]
         return args_for_saving
 
     def save(self, output_dir):
@@ -120,7 +125,7 @@ class ModelArgs:
         with open(os.path.join(output_dir, "model_args.json"), "w") as f:
             args_dict = self.get_args_for_saving()
             if args_dict["tokenizer_type"] is not None and not isinstance(
-                    args_dict["tokenizer_type"], str
+                args_dict["tokenizer_type"], str
             ):
                 args_dict["tokenizer_type"] = type(args_dict["tokenizer_type"]).__name__
             json.dump(args_dict, f)
@@ -301,6 +306,7 @@ class Seq2SeqArgs(ModelArgs):
     model_class: str = "Seq2SeqModel"
     base_marian_model_name: str = None
     dataset_class: Dataset = None
+    dataset_cache_dir: str = None
     do_sample: bool = False
     early_stopping: bool = True
     evaluate_generated_text: bool = False
@@ -345,6 +351,29 @@ class Seq2SeqArgs(ModelArgs):
                         "when loading the model."
                     )
                 self.update_from_dict(model_args)
+
+
+@dataclass
+class RetrievalArgs(Seq2SeqArgs):
+    """
+    Model args for a RetrievalModel
+    """
+
+    model_class: str = "RetrievalModel"
+    context_config: dict = field(default_factory=dict)
+    ddp_training: bool = False
+    embed_batch_size: int = 64
+    faiss_index_type: str = "IndexFlatIP"
+    hard_negatives: bool = False
+    include_title: bool = True
+    query_config: dict = field(default_factory=dict)
+    remove_duplicates_from_eval_passages: bool = False
+    retrieval_batch_size: int = 512
+    retrieve_n_docs: int = 10
+    save_passage_dataset: bool = True
+    train_context_encoder: bool = True
+    train_query_encoder: bool = True
+    use_hf_datasets: bool = True
 
 
 @dataclass

@@ -1,7 +1,15 @@
 import shutil
-
+import torch
 from deepoffense.classification.transformer_models.args.model_args import LanguageModelingArgs
 from deepoffense.language_modeling.language_modeling_model import LanguageModelingModel
+
+
+parser = argparse.ArgumentParser(
+    description='''evaluates multiple models  ''')
+parser.add_argument('--model_name', required=False, help='model name', default="bert-large-cased")
+parser.add_argument('--model_type', required=False, help='model type', default="bert")
+parser.add_argument('--cuda_device', required=False, help='cuda device', default=0)
+arguments = parser.parse_args()
 
 with open('output_file.txt','wb') as wfd:
     for f in ['data/gab_1M_unlabelled.csv','data/reddit_1M_unlabelled.csv']:
@@ -42,14 +50,16 @@ model_args.use_multiprocessing = False
 model_args.use_multiprocessing_for_evaluation = False
 
 
-
+MODEL_TYPE = arguments.model_type
+MODEL_NAME = arguments.model_name
+cuda_device = int(arguments.cuda_device)
 
 train_file = "train.txt"
 test_file = "test.txt"
 
-model = LanguageModelingModel(
-    "roberta", "roberta-large", args=model_args
-)
+model = LanguageModelingModel(MODEL_TYPE, MODEL_NAME, args=model_args,
+                            use_cuda=torch.cuda.is_available(),
+                            cuda_device=cuda_device)
 
 # Train the model
 model.train_model(train_file, eval_file=test_file)
