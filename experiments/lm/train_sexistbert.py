@@ -38,6 +38,10 @@ model_args.evaluate_during_training = True
 model_args.evaluate_during_training_steps = 30000
 model_args.no_save = True
 model_args.wandb_project = "LM"
+model_args.use_multiprocessing = False
+model_args.use_multiprocessing_for_evaluation = False
+
+
 
 
 train_file = "train.txt"
