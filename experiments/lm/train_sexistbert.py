@@ -8,8 +8,8 @@ from deepoffense.language_modeling.language_modeling_model import LanguageModeli
 
 parser = argparse.ArgumentParser(
     description='''evaluates multiple models  ''')
-parser.add_argument('--model_name', required=False, help='model name', default="bert-large-cased")
-parser.add_argument('--model_type', required=False, help='model type', default="bert")
+parser.add_argument('--model_name', required=False, help='model name', default="roberta-large")
+parser.add_argument('--model_type', required=False, help='model type', default="roberta")
 parser.add_argument('--cuda_device', required=False, help='cuda device', default=0)
 arguments = parser.parse_args()
 
