@@ -9,9 +9,9 @@ SEED = 777
 # training instances = 7000 > if batch size=8, batches = 875 > evaluate during training steps -> 80 or 175
 
 args = {
-    'output_dir': 'temp/outputs/',
-    "best_model_dir": "temp/outputs/best_model",
-    'cache_dir': 'temp/cache_dir/',
+    'output_dir': 'temp_taska/outputs/',
+    "best_model_dir": "temp_taska/outputs/best_model",
+    'cache_dir': 'temp_taska/cache_dir/',
 
     'fp16': False,
     'fp16_opt_level': 'O1',
