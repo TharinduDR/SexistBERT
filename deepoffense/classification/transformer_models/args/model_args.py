@@ -61,7 +61,7 @@ class ModelArgs:
     loss_args: dict = field(default_factory=dict)
     manual_seed: int = None
     max_grad_norm: float = 1.0
-    max_seq_length: int = 128
+    max_seq_length: int = 256
     model_name: str = None
     model_type: str = None
     multiprocessing_chunksize: int = -1
