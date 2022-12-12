@@ -48,6 +48,7 @@ model_args.evaluate_during_training = True
 model_args.evaluate_during_training_steps = 30000
 model_args.save_eval_checkpoints = True
 model_args.save_best_model = True
+model_args.save_recent_only = True
 model_args.wandb_project = "LM"
 model_args.use_multiprocessing = False
 model_args.use_multiprocessing_for_evaluation = False
