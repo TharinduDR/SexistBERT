@@ -39,7 +39,7 @@ with open('test.txt', 'w') as f:
 model_args = LanguageModelingArgs()
 model_args.reprocess_input_data = True
 model_args.overwrite_output_dir = True
-model_args.num_train_epochs = 50
+model_args.num_train_epochs = 25
 model_args.dataset_type = "simple"
 model_args.train_batch_size = 16
 model_args.eval_batch_size = 32
