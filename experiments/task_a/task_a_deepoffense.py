@@ -20,6 +20,7 @@ parser.add_argument('--model_type', required=False, help='model type', default="
 parser.add_argument('--cuda_device', required=False, help='cuda device', default=0)
 arguments = parser.parse_args()
 
+
 train = pd.read_csv("data/train_all_tasks.csv")
 test = pd.read_csv("data/dev_task_a_entries.csv")
 blind_test = pd.read_csv("data/test_task_a_entries.csv")
@@ -57,7 +58,7 @@ test['label_pred'] = decode(test['label_pred'])
 test = test[['rewire_id', 'label_pred']]
 test.to_csv(os.path.join(TEMP_DIRECTORY, RESULT_FILE), header=True, index=False, encoding='utf-8')
 
-blind_test["label_pred"] = predictions
+blind_test["label_pred"] = blind_test_predictions
 blind_test['label_pred'] = decode(blind_test['label_pred'])
 blind_test = blind_test[['rewire_id', 'label_pred']]
 blind_test.to_csv(os.path.join(TEMP_DIRECTORY, SUBMISSION_FILE), header=True, index=False, encoding='utf-8')
