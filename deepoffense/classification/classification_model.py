@@ -4,20 +4,20 @@
 
 from __future__ import absolute_import, division, print_function
 
-import math
-
 import glob
 import logging
-import numpy as np
+import math
 import os
-import pandas as pd
 import random
 import shutil
 import tempfile
-import torch
 import warnings
 from dataclasses import asdict
 from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import torch
 from scipy.stats import mode
 from sklearn.metrics import (
     confusion_matrix,
@@ -29,16 +29,21 @@ from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, Tenso
 from tqdm.auto import tqdm, trange
 from transformers import (
     BertConfig,
+    BertTokenizer,
     DistilBertConfig,
+    DistilBertTokenizer,
     LongformerConfig,
     LongformerForSequenceClassification,
+    LongformerTokenizer,
     RobertaConfig,
+    RobertaTokenizer,
     XLMConfig,
     XLMRobertaConfig,
+    XLMRobertaTokenizer,
     XLMTokenizer, AlbertConfig, AlbertTokenizer, AutoConfig, AutoModelForSequenceClassification, AutoTokenizer,
     BertTokenizerFast, BertweetTokenizer, CamembertConfig, CamembertTokenizerFast, DebertaConfig,
-    DebertaForSequenceClassification, DebertaTokenizer, DistilBertTokenizerFast, FlaubertConfig, FlaubertTokenizer,
-    LongformerTokenizerFast, RobertaTokenizerFast,
+    DebertaForSequenceClassification, DebertaTokenizer, DistilBertTokenizerFast, ElectraConfig, ElectraTokenizerFast,
+    FlaubertConfig, FlaubertTokenizer, LayoutLMConfig, LongformerTokenizerFast, RobertaTokenizerFast,
     XLMRobertaTokenizerFast, XLNetConfig, XLNetTokenizerFast,
 )
 from transformers.convert_graph_to_onnx import convert, quantize
@@ -64,6 +69,7 @@ from deepoffense.classification.transformer_models.roberta_model import RobertaF
 from deepoffense.classification.transformer_models.xlm_model import XLMForSequenceClassification
 from deepoffense.classification.transformer_models.xlm_roberta_model import XLMRobertaForSequenceClassification
 from deepoffense.classification.transformer_models.xlnet_model import XLNetForSequenceClassification
+from deepoffense.custom_models.models import ElectraForSequenceClassification
 
 try:
     import wandb
@@ -129,6 +135,11 @@ class ClassificationModel:
                 DistilBertForSequenceClassification,
                 DistilBertTokenizerFast,
             ),
+            "electra": (
+                ElectraConfig,
+                ElectraForSequenceClassification,
+                ElectraTokenizerFast,
+            ),
             "flaubert": (
                 FlaubertConfig,
                 FlaubertForSequenceClassification,
@@ -146,6 +157,7 @@ class ClassificationModel:
                 RobertaForSequenceClassification,
                 RobertaTokenizerFast,
             ),
+
 
             "xlm": (XLMConfig, XLMForSequenceClassification, XLMTokenizer),
             "xlmroberta": (

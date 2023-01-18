@@ -5,8 +5,6 @@ sklearn
 datasets
 tensorboardX
 transformers==4.16.2
-lime
 seqeval
 wandb
 sentencepiece
-spacy
