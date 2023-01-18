@@ -53,8 +53,8 @@ for fold in range(folds):
                                 use_cuda=torch.cuda.is_available(),
                                 cuda_device=cuda_device)
 
-    train = train.sample(frac=1, random_state=SEED).reset_index(drop=True)
-    train_df, eval_df = train_test_split(train, test_size=0.1, random_state=SEED)
+    train = train.sample(frac=1, random_state=SEED * fold).reset_index(drop=True)
+    train_df, eval_df = train_test_split(train, test_size=0.1, random_state=SEED * fold)
     model.train_model(train_df, eval_df=eval_df, macro_f1=macro_f1, weighted_f1=weighted_f1,
                       accuracy=sklearn.metrics.accuracy_score)
     predictions, raw_outputs = model.predict(test_sentences)
