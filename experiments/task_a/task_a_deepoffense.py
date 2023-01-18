@@ -3,17 +3,13 @@ import os
 import pandas as pd
 import shutil
 import sklearn
-import statistics
 import torch
 from sklearn.model_selection import train_test_split
-from scipy.special import softmax
-from datasets import Dataset
-from datasets import load_dataset
 
 from deepoffense.classification import ClassificationModel
 from deepoffense.util.evaluation import macro_f1, weighted_f1
 from deepoffense.util.label_converter import decode, encode
-from experiments.task_a.deepoffense_config import TEMP_DIRECTORY, args, SEED, RESULT_FILE
+from experiments.task_a.deepoffense_config import TEMP_DIRECTORY, args, SEED, RESULT_FILE, SUBMISSION_FILE
 
 if not os.path.exists(TEMP_DIRECTORY): os.makedirs(TEMP_DIRECTORY)
 
@@ -26,6 +22,7 @@ arguments = parser.parse_args()
 
 train = pd.read_csv("data/train_all_tasks.csv")
 test = pd.read_csv("data/dev_task_a_entries.csv")
+blind_test = pd.read_csv("data/test_task_a_entries.csv")
 
 train = train.rename(columns={'label_sexist': 'labels'})
 
@@ -35,6 +32,7 @@ train = train[['text', 'labels']]
 train['labels'] = encode(train["labels"])
 
 test_sentences = test['text'].tolist()
+blind_test_sentences = blind_test['text'].tolist()
 
 MODEL_TYPE = arguments.model_type
 MODEL_NAME = arguments.model_name
@@ -49,13 +47,20 @@ model = ClassificationModel(MODEL_TYPE, MODEL_NAME, args=args,
 
 train = train.sample(frac=1, random_state=SEED).reset_index(drop=True)
 train_df, eval_df = train_test_split(train, test_size=0.1, random_state=SEED)
-model.train_model(train_df, eval_df=eval_df, macro_f1=macro_f1, weighted_f1=weighted_f1, accuracy=sklearn.metrics.accuracy_score)
+model.train_model(train_df, eval_df=eval_df, macro_f1=macro_f1, weighted_f1=weighted_f1,
+                  accuracy=sklearn.metrics.accuracy_score)
 predictions, raw_outputs = model.predict(test_sentences)
+blind_test_predictions, blind_test_raw_outputs = model.predict(blind_test_sentences)
 
 test["label_pred"] = predictions
 test['label_pred'] = decode(test['label_pred'])
 test = test[['rewire_id', 'label_pred']]
 test.to_csv(os.path.join(TEMP_DIRECTORY, RESULT_FILE), header=True, index=False, encoding='utf-8')
+
+blind_test["label_pred"] = predictions
+blind_test['label_pred'] = decode(blind_test['label_pred'])
+blind_test = blind_test[['rewire_id', 'label_pred']]
+blind_test.to_csv(os.path.join(TEMP_DIRECTORY, SUBMISSION_FILE), header=True, index=False, encoding='utf-8')
 
 # with open('data/gab_1M_unlabelled.csv') as f:
 #     gab_lines = f.read().splitlines()
