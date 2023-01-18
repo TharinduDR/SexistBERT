@@ -1,4 +1,5 @@
 import argparse
+import numpy as np
 import os
 import pandas as pd
 import shutil
@@ -18,8 +19,10 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--model_name', required=False, help='model name', default="bert-large-cased")
 parser.add_argument('--model_type', required=False, help='model type', default="bert")
 parser.add_argument('--cuda_device', required=False, help='cuda device', default=0)
+parser.add_argument('--folds', required=False, help='numbner of folds', default=1)
 arguments = parser.parse_args()
 
+folds = int(arguments.folds)
 
 train = pd.read_csv("data/train_all_tasks.csv")
 test = pd.read_csv("data/dev_task_a_entries.csv")
@@ -35,30 +38,46 @@ train['labels'] = encode(train["labels"])
 test_sentences = test['text'].tolist()
 blind_test_sentences = blind_test['text'].tolist()
 
-MODEL_TYPE = arguments.model_type
-MODEL_NAME = arguments.model_name
-cuda_device = int(arguments.cuda_device)
+test_preds = np.zeros((len(test_sentences), folds))
+blind_test_preds = np.zeros((len(blind_test_sentences), folds))
 
-if os.path.exists(args['output_dir']) and os.path.isdir(args['output_dir']):
-    shutil.rmtree(args['output_dir'])
-torch.cuda.set_device(cuda_device)
-model = ClassificationModel(MODEL_TYPE, MODEL_NAME, args=args,
-                            use_cuda=torch.cuda.is_available(),
-                            cuda_device=cuda_device)
+for fold in range(folds):
+    MODEL_TYPE = arguments.model_type
+    MODEL_NAME = arguments.model_name
+    cuda_device = int(arguments.cuda_device)
 
-train = train.sample(frac=1, random_state=SEED).reset_index(drop=True)
-train_df, eval_df = train_test_split(train, test_size=0.1, random_state=SEED)
-model.train_model(train_df, eval_df=eval_df, macro_f1=macro_f1, weighted_f1=weighted_f1,
-                  accuracy=sklearn.metrics.accuracy_score)
-predictions, raw_outputs = model.predict(test_sentences)
-blind_test_predictions, blind_test_raw_outputs = model.predict(blind_test_sentences)
+    if os.path.exists(args['output_dir']) and os.path.isdir(args['output_dir']):
+        shutil.rmtree(args['output_dir'])
+    torch.cuda.set_device(cuda_device)
+    model = ClassificationModel(MODEL_TYPE, MODEL_NAME, args=args,
+                                use_cuda=torch.cuda.is_available(),
+                                cuda_device=cuda_device)
 
-test["label_pred"] = predictions
+    train = train.sample(frac=1, random_state=SEED).reset_index(drop=True)
+    train_df, eval_df = train_test_split(train, test_size=0.1, random_state=SEED)
+    model.train_model(train_df, eval_df=eval_df, macro_f1=macro_f1, weighted_f1=weighted_f1,
+                      accuracy=sklearn.metrics.accuracy_score)
+    predictions, raw_outputs = model.predict(test_sentences)
+    test_preds[:, fold] = predictions
+    blind_test_predictions, blind_test_raw_outputs = model.predict(blind_test_sentences)
+    blind_test_preds[:, fold] = blind_test_predictions
+
+final_predictions = []
+for row in test_preds:
+    row = row.tolist()
+    final_predictions.append(int(max(set(row), key=row.count)))
+
+test["label_pred"] = final_predictions
 test['label_pred'] = decode(test['label_pred'])
 test = test[['rewire_id', 'label_pred']]
 test.to_csv(os.path.join(TEMP_DIRECTORY, RESULT_FILE), header=True, index=False, encoding='utf-8')
 
-blind_test["label_pred"] = blind_test_predictions
+blind_final_predictions = []
+for row in blind_test_preds:
+    row = row.tolist()
+    blind_final_predictions.append(int(max(set(row), key=row.count)))
+
+blind_test["label_pred"] = blind_final_predictions
 blind_test['label_pred'] = decode(blind_test['label_pred'])
 blind_test = blind_test[['rewire_id', 'label_pred']]
 blind_test.to_csv(os.path.join(TEMP_DIRECTORY, SUBMISSION_FILE), header=True, index=False, encoding='utf-8')
